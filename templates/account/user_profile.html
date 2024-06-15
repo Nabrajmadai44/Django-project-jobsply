@@ -1,0 +1,60 @@
+{% extends 'layouts/sub_base.html' %}
+{% load static %}
+
+{% block title %}
+    User Profile
+{% endblock %}
+
+{% block sub_content %}
+    <br><br>
+    <div class="row">
+        <div class="col-md-4">
+            {% if request.user.userprofile.profile_picture %}
+                <img src="{{ request.user.userprofile.profile_picture.url }}" alt="" style="height: 350px; width: 350px">
+                {% else %}
+                <img src="{% static 'main/default.png' %}" style="height: 350px; width: 350px">
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <h2>User Profile</h2>
+            <br>
+            <table class="table table-striped">
+                <tr>
+                    <td>Name</td>
+                    <td>{{ object.get_full_name }}</td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td>{{ object.email }}</td>
+                </tr>
+                <tr>
+                    <td>Phone</td>
+                    <td>{% if object.userprofile.phone %}{{ object.userprofile.phone }}{% else %}---{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Address</td>
+                    <td>{% if object.userprofile.address %}{{ object.userprofile.address }}{% else %}---{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Resume</td>
+                    <td>{% if object.userprofile.resume %}
+                        <a target="_blank" href="{{ object.userprofile.resume.url }}">View Resume</a>
+                    {% else %}---{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Bio</td>
+                    <td>{% if object.userprofile.bio %}
+                        {{ object.userprofile.bio }}
+                    {% else %}---{% endif %}</td>
+                </tr>
+
+                <tr>
+                    <td>Account Status</td>
+                    <td>{% if object.is_verified %}
+                        <span style="background-color: forestgreen; padding: 5px; color: white">Activated</span>
+                    {% else %}<span style="background-color: red; padding: 5px; color: white">Not Activated</span>{% endif %}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+{% endblock %}

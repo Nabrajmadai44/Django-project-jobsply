@@ -1,0 +1,67 @@
+{% extends 'layouts/sub_base.html' %}
+{% load static %}
+
+{% block title %}My Jobs{% endblock %}
+
+{% block style %}
+    <style>
+        #resend {
+            color: white;
+            text-decoration: none;
+            font-weight: lighter;
+        }
+
+        #resend:hover {
+            text-decoration: underline;
+        }
+
+        .card-body p {
+            margin: 3px;
+            color: grey;
+        }
+
+        .job-title {
+            color: black;
+            text-decoration: none;
+        }
+
+        .job-title:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+{% endblock %}
+
+{% block sub_content %}
+    <div style="display: flex; flex-wrap: wrap;">
+        {% for application in object_list %}
+            <div class="card" style="flex: 0 0 20%; margin: 5px; padding: 10px; width: 20%">
+                <img class="card-img-top" style="height: 40%; width: 40%" src="{% static 'main/job/job.svg' %}"
+                     alt="Card image cap">
+                <hr>
+                <div class="card-body">
+                    <h5><a href="{% url 'job_detail' application.job.id %}" class="job-title">{{ application.job.title }}</a></h5>
+                    <p class="card-text"><i class="fa fa-map-marker"></i> {{ application.job.location }}</p>
+                    <p class="card-text"><i class="fa-solid fa-list"></i> {{ application.job.category.title }}</p>
+                    <p>Status: {{ application.status }}</p>
+                    <p class="card-text" style="font-size: 0.8rem; color: red"><i
+                            class="fa fa-clock-o"></i> {{ application.job.apply_before }}</p>
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+    {% if is_paginated %}
+        {% include 'includes/pagination.html' %}
+    {% endif %}
+    <div style="height: 50px"></div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        function hideMessage() {
+            messg = document.getElementById("cross-message")
+            messg.style.display = "none"
+        }
+    </script>
+{% endblock %}

@@ -1,9 +1,14 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, FormView
+from django.contrib.auth import get_user_model
+from django.views.generic import CreateView, FormView, View, DetailView
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from .forms import UserRegisterForm, UserLoginForm
+from .utils import send_email_activation
+from .models import UserAccountActivation
+
+User = get_user_model()
 
 
 class UserRegisterView(CreateView):
@@ -17,6 +22,7 @@ class UserRegisterView(CreateView):
         user = form.save()
         user.set_password(password1)
         user.save()
+        send_email_activation(user, self.request)
         messages.success(self.request, "User created successfully!")
         return redirect("home_page")
 
@@ -39,3 +45,38 @@ class UserLoginView(FormView):
             return redirect("home_page")
         messages.error(self.request, "Invalid credentials!")
         return redirect("user_login")
+
+
+def user_logout(request):
+    logout(request)
+    messages.success(request, "User logged out !")
+    return redirect("home_page")
+
+
+class UserAccountActivationView(View):
+    def get(self, *args, **kwargs):
+        username = kwargs["username"]
+        key = kwargs["key"]
+        user = User.objects.filter(username=username)
+        if user.exists():
+            user = user[0]
+            ua = UserAccountActivation.objects.filter(key=key, email=user.email)
+            if ua.exists():
+                user.is_verified = True
+                user.save()
+                messages.success(self.request, "Account Activated !")
+                return redirect("home_page")
+        messages.error(self.request, "Invalid activation link !")
+        return redirect("user_login")
+
+
+class ResendEmailActivation(View):
+    def get(self, *args, **kwargs):
+        send_email_activation(self.request.user, self.request)
+        messages.success(self.request, "Activation link resent !")
+        return redirect("home_page")
+
+
+class UserProfileView(DetailView):
+    queryset = User.objects.all()
+    template_name = "account/user_profile.html"
