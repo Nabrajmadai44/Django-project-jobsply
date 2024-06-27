@@ -45,6 +45,33 @@
         </div>
         <br>
     {% endif %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-6">
+                    <br>
+                    <label>Filter by category:</label>
+                    <select class="form-control">
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <br><br>
+                    <form method="get">
+                        <input style="width: 72%; display: inline" placeholder="Search..."
+                               type="text" class="form-control" name="search" value="{{ request.GET.search }}">
+                        <button style="margin-left: 5px" class="btn btn-success" type="submit">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <br><br>
+            <a href="{% url 'home_page' %}" class="btn btn-primary">Clear</a>
+        </div>
+    </div>
     <div style="display: flex; flex-wrap: wrap;">
         {% for job in object_list %}
             <div class="card" style="flex: 0 0 20%; margin: 5px; padding: 10px; width: 20%">
@@ -58,8 +85,14 @@
                     <p class="card-text" style="font-size: 0.8rem; color: red"><i
                             class="fa fa-clock-o"></i> {{ job.apply_before }}</p>
                     {% if request.user.is_authenticated %}
-                        <a href="#" data-toggle="modal" data-target="#apply_{{ job.id }}"
-                           class="btn btn-outline-primary" style="float: right">Apply Now</a>
+                        {% if not job.applied %}
+                            <a href="{% url 'user_login' %}" class="btn btn-outline-primary" style="float: right">
+                                Apply Now
+                            </a>
+                        {% else %}
+                            <button class="btn btn-outline-primary" disabled style="float: right">Applied</button>
+                        {% endif %}
+
 
                         <div class="modal fade" id="apply_{{ job.id }}" tabindex="-1" role="dialog"
                              aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -67,7 +100,8 @@
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="exampleModalLabel">Apply to job {{ job.title }}</h5>
-                                            <span class="close" data-dismiss="modal" aria-label="Close" aria-hidden="true" style="margin-left: 15px; text-decoration: none; cursor: pointer">&times;</span>
+                                        <span class="close" data-dismiss="modal" aria-label="Close" aria-hidden="true"
+                                              style="margin-left: 15px; text-decoration: none; cursor: pointer">&times;</span>
                                     </div>
                                     <div class="modal-body">
                                         <p>Are you sure you want to apply for this job?</p>
@@ -81,8 +115,13 @@
                             </div>
                         </div>
                     {% else %}
-                        <a href="{% url 'user_login' %}" class="btn btn-outline-primary" style="float: right">Apply
-                            Now</a>
+                        {% if not job.applied %}
+                            <a href="{% url 'user_login' %}" class="btn btn-outline-primary" style="float: right">
+                                Apply Now
+                            </a>
+                        {% else %}
+                            <button class="btn btn-outline-primary" style="float: right" disabled>Applied</button>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

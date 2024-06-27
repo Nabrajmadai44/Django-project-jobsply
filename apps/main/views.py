@@ -1,13 +1,34 @@
-from django.shortcuts import render, redirect
-from django.views.generic import ListView, DetailView, View
+# import requests
+from django.shortcuts import render, redirect, reverse
+from django.views.generic import ListView, DetailView, View, TemplateView
 from django.contrib import messages
-from .models import Job, JobApplication, APPLIED
+from django.db.models import OuterRef, Exists, Value
+from django.urls import reverse_lazy
+from .models import Job, JobApplication, APPLIED, Category
 
 
 class HomePageView(ListView):
     template_name = "main/home.html"
-    queryset = Job.objects.all().order_by("-created_at")
     paginate_by = 6
+
+    def get_queryset(self):
+        try:
+            applied_jobs = JobApplication.objects.filter(
+                user=self.request.user,
+                job=OuterRef('pk')
+            )
+            qs = Job.objects.all().annotate(applied=Exists(applied_jobs)).order_by("-created_at")
+        except:
+            qs = Job.objects.all().annotate(applied=Value(False)).order_by("-created_at")
+        search = self.request.GET.get("search")
+        if search:
+            qs = qs.filter(title__icontains=search)
+        return qs
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context["categories"] = Category.objects.all()
+        return context
 
 
 class JobDetailView(DetailView):
@@ -47,3 +68,25 @@ class MyJobs(ListView):
 
     def get_queryset(self):
         return JobApplication.objects.filter(user=self.request.user)
+
+
+class KhaltiPayment(TemplateView):
+    template_name = "main/khalti_payment.html"
+
+class PaymentVerify(View):
+    def post(self, *args, **kwargs):
+        verification_url = "https://khalti.com/api/v2/payment/verify/"
+        print(self.request.POST)
+        token = self.request.POST.get("token")
+        amount = 1000
+        data = dict(token=token, amount=amount)
+        headers = {
+            'Authorization': 'Key test_secret_key_7f05835f6e0c4511a35e2dd7eeacb82d'
+        }
+        response = requests.post(verification_url, data=data, headers=headers)
+        if response.status_code in [200, "200"]:
+            print("Payment Success !!")
+            messages.success(self.request, "Payment Success!!")
+            return redirect("home_page")
+        messages.error(self.request, "Could not verify the payment")
+        return redirect("home_page")
