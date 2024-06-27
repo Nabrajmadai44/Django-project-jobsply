@@ -1,4 +1,4 @@
-# import requests
+import requests
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import ListView, DetailView, View, TemplateView
 from django.contrib import messages
