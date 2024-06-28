@@ -81,7 +81,7 @@ class PaymentVerify(View):
         amount = 1000
         data = dict(token=token, amount=amount)
         headers = {
-            'Authorization': 'Key test_secret_key_7f05835f6e0c4511a35e2dd7eeacb82d'
+            'Authorization': 'Key test_secret_key_42f4e1c7c3ee45d5bf38b04004d69fb8'
         }
         response = requests.post(verification_url, data=data, headers=headers)
         if response.status_code in [200, "200"]:
