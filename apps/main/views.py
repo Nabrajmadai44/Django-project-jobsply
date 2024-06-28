@@ -1,4 +1,4 @@
-# import requests
+import requests
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import ListView, DetailView, View, TemplateView
 from django.contrib import messages
@@ -83,10 +83,10 @@ class PaymentVerify(View):
         headers = {
             'Authorization': 'Key test_secret_key_7f05835f6e0c4511a35e2dd7eeacb82d'
         }
-        # response = requests.post(verification_url, data=data, headers=headers)
-        # if response.status_code in [200, "200"]:
-            # print("Payment Success !!")
-        #     messages.success(self.request, "Payment Success!!")
-        #     return redirect("home_page")
-        # messages.error(self.request, "Could not verify the payment")
-        # return redirect("home_page")
+        response = requests.post(verification_url, data=data, headers=headers)
+        if response.status_code in [200, "200"]:
+            print("Payment Success !!")
+            messages.success(self.request, "Payment Success!!")
+            return redirect("home_page")
+        messages.error(self.request, "Could not verify the payment")
+        return redirect("home_page")
